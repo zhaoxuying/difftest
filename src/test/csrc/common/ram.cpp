@@ -17,6 +17,7 @@
 #include "ram.h"
 #include "common.h"
 #include "compress.h"
+#include "load_elf.h"
 #include <iostream>
 #include <sys/mman.h>
 #ifdef CONFIG_DIFFTEST_PERFCNT
@@ -289,6 +290,10 @@ MmapMemory::MmapMemory(const char *image, uint64_t n_bytes) : SimMemory(n_bytes)
   } else if (isZstdFile(image)) {
     Info("Zstd file detected and loading image from extracted zstd file\n");
     img_size = readFromZstd(ram, image, memory_size, LOAD_RAM);
+    assert(img_size >= 0);
+  } else if (isElfFile(image)) {
+    Info("Elf file detected and loading image from elf file\n");
+    img_size = load_elf(ram, image);
     assert(img_size >= 0);
   } else {
     InputReader *reader = createInputReader(image);
